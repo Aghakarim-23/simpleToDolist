@@ -24,7 +24,7 @@ function addTask() {
 
 function renderTask() {
   if (tasks.length === 0) {
-    taskList.innerHTML = `<p class="text-center">You haven't add task yet</p>`;
+    taskList.innerHTML = `<p class="text-center text-red-400 mt-4">You haven't add task yet</p>`;
   } else {
     taskList.innerHTML = tasks
       .map(
