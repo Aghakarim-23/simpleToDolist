@@ -67,12 +67,16 @@ function completeTask(id) {
         (task) => `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
                 <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
-                <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
-                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
-                </button>
-                <button onclick="deleteCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
+               
+                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
             </li>
             `
+
+            /* burada delete add buttonunu sildim ona gore ki, eger user sildiyi taski yeniden yerine qaytaramaq istese elave ederem
+             <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
+                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
+                </button>
+            */
       )
       .join("");
       
@@ -110,15 +114,20 @@ function renderCompletedTask () {
             `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
                 <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
-                <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
-                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
-                </button>
-                <button onclick="deleteCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
+               
+                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
             </li>
             `
       )
       .join("");
 
+
+      /* 
+      
+         <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
+                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
+                </button>
+      */
         
 }
 
