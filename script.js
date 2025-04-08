@@ -24,7 +24,7 @@ function addTask() {
   }
 
   tasks.push(newTask);
-//   input.value = "";
+  input.value = "";
 
   localStorage.setItem("tasks", JSON.stringify(tasks));
 
@@ -38,7 +38,7 @@ function renderTask() {
     taskList.innerHTML = tasks
       .map(
         (task) => `
-            <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]" contenteditable="true">
+            <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
                 <p class="w-[70%] pl-2 h-full flex items-center">${task.text}</p>
                 <button onclick="completeTask(${task.id})" class="w-[15%]  flex justify-center items-center h-full hover:cursor-pointer border-l group">
                     <i class="fa-solid fa-circle-check text-gray-500 hover:cursor-pointer group-hover:text-green-600"></i>
