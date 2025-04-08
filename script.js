@@ -127,6 +127,11 @@ if(checkIt) {
     tasks.push(checkIt)
     console.log(id);
 }
+
+localStorage.setItem("tasks", JSON.stringify(tasks));
+localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray));
+
+
 renderCompletedTask()
 renderTask()
 }
