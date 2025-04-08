@@ -38,12 +38,12 @@ function renderTask() {
     taskList.innerHTML = tasks
       .map(
         (task) => `
-            <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
+            <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]" contenteditable="true">
                 <p class="w-[70%] pl-2 h-full flex items-center">${task.text}</p>
-                <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
-                    <i class="fa-solid fa-circle-check text-gray-500 hover:cursor-pointer"></i>
+                <button onclick="completeTask(${task.id})" class="w-[15%]  flex justify-center items-center h-full hover:cursor-pointer border-l group">
+                    <i class="fa-solid fa-circle-check text-gray-500 hover:cursor-pointer group-hover:text-green-600"></i>
                 </button>
-                <button onclick="deleteTask(${task.id})" class="w-[15%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
+                <button onclick="deleteTask(${task.id})" class="w-[15%] text-white border-black flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
             </li>
             `
       )
@@ -67,27 +67,22 @@ function completeTask(id) {
         (task) => `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
                 <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
+                <button onclick="restoreCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l group">
+                    <i class="fas fa-trash-restore text-blue-300 group-hover:text-blue-500 "></i>                   
+                </button>
                
-                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
+                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-black border-l text-white">Delete</button>
             </li>
             `
-
-            /* burada delete add buttonunu sildim ona gore ki, eger user sildiyi taski yeniden yerine qaytaramaq istese elave ederem
-             <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
-                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
-                </button>
-            */
       )
       .join("");
       
     localStorage.setItem("tasks", JSON.stringify(tasks));
     localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray));
     renderTask();
-    // localStorage.clear("tasks")
   }
   
 }
-
 
 function deleteTask(id) {
   tasks = tasks.filter((task) => task.id !== id);
@@ -98,8 +93,6 @@ function deleteTask(id) {
 function deleteCompletedTask (id) {
     const completedTaskDeleteItem = completedTasksArray.find((item => item.id === id))
     if(completedTaskDeleteItem) {
-        console.log(completedTaskDeleteItem);
-
         completedTasksArray = completedTasksArray.filter(item => item.id !== id)
     }
 
@@ -114,24 +107,30 @@ function renderCompletedTask () {
             `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
                 <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
-               
-                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-l">Delete</button>
+                <button onclick="restoreCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l group">
+                    <i class="fas fa-trash-restore text-blue-300 group-hover:text-blue-500"></i>                   
+                </button>
+                <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] text-white flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-black border-l">Delete</button>
             </li>
             `
       )
       .join("");
 
-
-      /* 
-      
-         <button onclick="completeTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l">
-                    <i class="fa-solid fa-circle-check text-green-500 hover:cursor-pointer"></i>
-                </button>
-      */
-        
 }
 
+function restoreCompletedTask (id) {
 
+const checkIt = completedTasksArray.find(item => item.id === id);
+
+if(checkIt) {
+    completedTasksArray = completedTasksArray.filter(item => item.id !== id)
+    tasks.push(checkIt)
+    console.log(id);
+}
+renderCompletedTask()
+renderTask()
+}
+ 
 document.addEventListener("DOMContentLoaded", () => {
   const savedTasks = localStorage.getItem("tasks");
   if (savedTasks) {
