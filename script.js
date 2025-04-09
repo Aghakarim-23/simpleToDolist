@@ -7,29 +7,83 @@ let completedTasksArray = [];
 
 let unCompletedTasks = document.getElementById("unCompletedTasks");
 let completedTasks = document.getElementById("completedTasks");
+
 const lengthUnCompletedTasks = tasks.length;
 const lengthCompletedTasks = completedTasksArray.length;
 
-function addTask() {
+const url  = "https://67f4e883913986b16fa24dae.mockapi.io/api/todos/";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTasks = localStorage.getItem("tasks");
+
+  if (savedTasks) {
+    tasks = JSON.parse(savedTasks);
+    renderTask();
+    renderCompletedTask();
+  }  else {
+    getTodos();
+  };
+
+
+  
+  const completedTasks = localStorage.getItem("completedTasksArray");
+    if (completedTasks) {
+    completedTasksArray = JSON.parse(completedTasks);
+    renderCompletedTask();
+};
+
+
+  async function getTodos () {
+    try {
+      const response =  await fetch(url);
+      const data =  await response.json();
+      const completedData = data.filter(item => item.progress === true);
+      const uncompletedData = data.filter(item => item.progress === false);
+
+      tasks = uncompletedData;
+      completedTasksArray = completedData;
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      
+      renderTask();
+      renderCompletedTask();
+    } catch (error) {
+      console.error(error)
+    };
+  };
+      getTodos();
+});
+
+
+async function addTask() {
   let inputValue = input.value;
 
   const newTask = {
-    id: Date.now(),
-    text: inputValue,
+    name: inputValue,
   };
 
   if (inputValue.trim() === "") {
     alert("You must add a task");
     return;
-  }
+  };
 
   tasks.push(newTask);
   input.value = "";
 
   localStorage.setItem("tasks", JSON.stringify(tasks));
 
-  renderTask();
-}
+  try {
+    await fetch(url, {
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+        },
+        "body": JSON.stringify(newTask)
+    })
+  } catch (error) {
+    console.error(error)
+  };
+    renderTask();
+};
 
 function renderTask() {
   if (tasks.length === 0) {
@@ -39,7 +93,7 @@ function renderTask() {
       .map(
         (task) => `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
-                <p class="w-[70%] pl-2 h-full flex items-center">${task.text}</p>
+                <p class="w-[70%] pl-2 h-full flex items-center">${task.name}</p>
                 <button onclick="completeTask(${task.id})" class="w-[15%]  flex justify-center items-center h-full hover:cursor-pointer border-l group">
                     <i class="fa-solid fa-circle-check text-gray-500 hover:cursor-pointer group-hover:text-green-600"></i>
                 </button>
@@ -48,25 +102,40 @@ function renderTask() {
             `
       )
       .join("");
-  }
+  };
+
   unCompletedTasks.textContent = `Uncompleted tasks: ${tasks.length}`;
   completedTasks.textContent = `Completed tasks: ${completedTasksArray.length}`;
+};
 
-}
-
-function completeTask(id) {
-  let completedTask = tasks.find((item) => item.id === id);
+async function completeTask(id) {
+  let completedTask = tasks.find((item) => item.id == id);
 
   if (completedTask) {
-    completedTasksArray.push(completedTask);
+    completedTask = {...completedTask, progress: true};
 
-    tasks = tasks.filter((item) => item.id !== id);
+    completedTasksArray.push(completedTask);
+    tasks = tasks.filter((item) => item.id != id);
+
+    try {
+      await fetch(`${url}${id}`, {
+          "method": "PUT",
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": JSON.stringify(completedTask)
+      });
+    } catch (error) {
+      console.error(error)
+    }
+  
+
 
     completedTaskList.innerHTML = completedTasksArray
       .map(
         (task) => `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
-                <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
+                <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.name}</p>
                 <button onclick="restoreCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l group">
                     <i class="fas fa-trash-restore text-blue-300 group-hover:text-blue-500 "></i>                   
                 </button>
@@ -76,79 +145,80 @@ function completeTask(id) {
             `
       )
       .join("");
-      
+
     localStorage.setItem("tasks", JSON.stringify(tasks));
-    localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray));
+    localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray)
+    );
     renderTask();
+  };
+};
+
+async function deleteTask(id) {
+    try {
+        await fetch(`${url}${id}`, {
+          "method": "DELETE"
+      }); 
+      tasks = tasks.filter((task) => task.id != id);
+      renderTask();
+
+    } catch (error) {
+      console.error(error)
+    };
+}
+
+async function deleteCompletedTask(id) {
+
+  const completedTaskDeleteItem = completedTasksArray.find((item) => item.id == id);
+
+  if (completedTaskDeleteItem) {
+    completedTasksArray = completedTasksArray.filter((item) => item.id != id);
   }
-  
+
+  try {
+    await fetch(`${url}${id}`, {
+      "method": "DELETE"
+    })
+    renderTask();
+  } catch (error) {
+    console.error(error)
+  };
+
+  localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray));
+  renderCompletedTask();
 }
 
-function deleteTask(id) {
-  tasks = tasks.filter((task) => task.id !== id);
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  renderTask();
-}
-
-function deleteCompletedTask (id) {
-    const completedTaskDeleteItem = completedTasksArray.find((item => item.id === id))
-    if(completedTaskDeleteItem) {
-        completedTasksArray = completedTasksArray.filter(item => item.id !== id)
-    }
-
-    localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray))
-    renderTask()
-    renderCompletedTask()    
-}
-
-
-function renderCompletedTask () {
-    completedTaskList.innerHTML = completedTasksArray.map(task => 
-            `
+function renderCompletedTask() {
+  completedTaskList.innerHTML = completedTasksArray
+    .map(
+      (task) =>
+        `
             <li class="w-full flex border rounded-r-lg overflow-hidden h-[3rem]">
-                <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.text}</p>
+                <p class="w-[70%] pl-2 h-full flex items-center line-through text-gray-400">${task.name}</p>
                 <button onclick="restoreCompletedTask(${task.id})" class="w-[15%] flex justify-center items-center h-full hover:cursor-pointer border-l group">
                     <i class="fas fa-trash-restore text-blue-300 group-hover:text-blue-500"></i>                   
                 </button>
                 <button onclick="deleteCompletedTask(${task.id})" class="w-[30%] text-white flex justify-center items-center bg-red-500 h-full hover:cursor-pointer text-[14px] border-black border-l">Delete</button>
             </li>
             `
-      )
-      .join("");
-
+    )
+    .join("");
 }
 
-function restoreCompletedTask (id) {
+function restoreCompletedTask(id) {
+  const isRestoredTask = completedTasksArray.find((item) => item.id === id);
 
-const checkIt = completedTasksArray.find(item => item.id === id);
-
-if(checkIt) {
-    completedTasksArray = completedTasksArray.filter(item => item.id !== id)
-    tasks.push(checkIt)
-    console.log(id);
-}
-
-localStorage.setItem("tasks", JSON.stringify(tasks));
-localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray));
-
-
-renderCompletedTask()
-renderTask()
-}
- 
-document.addEventListener("DOMContentLoaded", () => {
-  const savedTasks = localStorage.getItem("tasks");
-  if (savedTasks) {
-    tasks = JSON.parse(savedTasks);
+  if (isRestoredTask) {
+    completedTasksArray = completedTasksArray.filter((item) => item.id !== id);
+    tasks.push(checkIt);
   }
 
-  const completedTasks = localStorage.getItem("completedTasksArray"); 
-  if (completedTasks) {
-    completedTasksArray = JSON.parse(completedTasks);
-}
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  localStorage.setItem("completedTasksArray", JSON.stringify(completedTasksArray)
+  );
 
-renderTask();
-renderCompletedTask()
-});
+  renderCompletedTask();
+  renderTask();
+};
+
 
 
